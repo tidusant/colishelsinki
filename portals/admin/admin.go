@@ -100,7 +100,9 @@ func callgRPC(address string, rpcRequest pb.RPCRequest) models.RequestResult {
 	if err != nil {
 		return c3mcommon.ReturnJsonMessage("-1", fmt.Sprintf("could not call service: %v", err.Error()), "", "")
 	}
-	return c3mcommon.ReturnJsonMessage("1", "", "", r.Data)
+	var rs models.RequestResult
+	json.Unmarshal([]byte(r.Data), &rs)
+	return rs
 }
 
 func myRoute(c *gin.Context) models.RequestResult {
@@ -148,6 +150,7 @@ func myRoute(c *gin.Context) models.RequestResult {
 	reply := c3mcommon.ReturnJsonMessage("0", "unknown error", "", "")
 
 	//check session
+
 	if !rpsex.CheckSession(session) {
 		return c3mcommon.ReturnJsonMessage("-2", "session not found", "", "")
 	}
@@ -156,10 +159,11 @@ func myRoute(c *gin.Context) models.RequestResult {
 	}
 
 	//always check login if RPCname not aut and create session
-	authreply := callgRPC(authclusterIP+":"+authport, pb.RPCRequest{AppName: "admin-portal", Action: "auth", Params: requestParams, Session: session, UserIP: userIP})
-	if authreply.Status != "1" {
-		return authreply
+	reply = callgRPC(authclusterIP+":"+authport, pb.RPCRequest{AppName: "admin-portal", Action: "aut", Params: requestParams, Session: session, UserIP: userIP})
+	if reply.Status != "1" {
+		return reply
 	}
+	log.Debugf("authentication: %+v", reply)
 	//get logininfo: from check login in format: userid[+]shopid
 	logininfo := strings.Split(reply.Data, "[+]")
 	UserId := logininfo[0]
