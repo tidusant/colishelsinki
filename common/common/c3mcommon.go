@@ -47,14 +47,6 @@ var (
 
 func init() {
 	fmt.Print("init common...")
-	//Config
-	viper.SetConfigName("config") // no need to include file extension
-	viper.AddConfigPath(".")      // set the  path of your config file
-
-	err := viper.ReadInConfig()
-	if !CheckError("Config file not found...", err) {
-		os.Exit(1)
-	}
 	initListLocale()
 	initCountryFlag()
 	initListCountry()
@@ -460,18 +452,18 @@ func initCountryFlag() {
 
 func ConnectDB(dbname string) (db *mgo.Database, strErr string) {
 	//get database config from ENV
-	hosts:=strings.Trim(os.Getenv(strings.ToUpper(dbname)+"_DB_HOST")," ")
-	name:=strings.Trim(os.Getenv(strings.ToUpper(dbname)+"_DB_NAME")," ")
-	user:=strings.Trim(os.Getenv(strings.ToUpper(dbname)+"_DB_USER")," ")
-	pass:=strings.Trim(os.Getenv(strings.ToUpper(dbname)+"_DB_PASS")," ")
+	hosts := strings.Trim(os.Getenv(strings.ToUpper(dbname)+"_DB_HOST"), " ")
+	name := strings.Trim(os.Getenv(strings.ToUpper(dbname)+"_DB_NAME"), " ")
+	user := strings.Trim(os.Getenv(strings.ToUpper(dbname)+"_DB_USER"), " ")
+	pass := strings.Trim(os.Getenv(strings.ToUpper(dbname)+"_DB_PASS"), " ")
 	if hosts == "" || name == "" || user == "" || pass == "" {
-		strErr="Missing config data for database connection"
+		strErr = "Missing config data for database connection"
 		return db, strErr
 	}
 
 	//call to connection
 	mongoDBDialInfo := mgo.DialInfo{
-		Addrs:    strings.Split(hosts,","),
+		Addrs:    strings.Split(hosts, ","),
 		Timeout:  60 * time.Second,
 		Database: name,
 		Username: user,
@@ -480,7 +472,7 @@ func ConnectDB(dbname string) (db *mgo.Database, strErr string) {
 
 	mongoSession, err := mgo.DialWithInfo(&mongoDBDialInfo)
 
-	if CheckError("error when connect db "+name+" with user "+user+" and pass "+pass+" on "+hosts,err) {
+	if CheckError("error when connect db "+name+" with user "+user+" and pass "+pass+" on "+hosts, err) {
 		mongoSession.SetMode(mgo.Monotonic, true)
 		db = mongoSession.DB(name)
 	}
@@ -489,8 +481,8 @@ func ConnectDB(dbname string) (db *mgo.Database, strErr string) {
 	}
 	return db, strErr
 }
-func GetSpecialChar() string{
-	return `.*?/\n~!@#$%^&*(),.[];'<>"`+"`"
+func GetSpecialChar() string {
+	return `.*?/\n~!@#$%^&*(),.[];'<>"` + "`"
 }
 func ReturnJsonMessage(status, strerr, strmsg, data string) models.RequestResult {
 	if data == "" {
