@@ -4,7 +4,7 @@ LABEL maintainer="Duy Ha <duyhph@gmail.com>"
 # Set the Current Working Directory inside the container
 WORKDIR /app
 # Copy exec file and config
-COPY auth config.toml ./
+COPY auth ./
 
 # Build the Go app
 #RUN go build -o main .
